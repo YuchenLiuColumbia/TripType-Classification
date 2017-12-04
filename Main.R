@@ -5,6 +5,7 @@ library(stringr)
 library(rpart)
 library(party)
 library(xgboost)
+library(caret)
 
 train <- read.table('E://Files/Columbia/17fall Courses/4995 CS DATA SCIENCE/HW3/train.csv', sep = ',', header = T)
 test <- read.table('E://Files/Columbia/17fall Courses/4995 CS DATA SCIENCE/HW3/test.csv', sep = ',', header = T)
@@ -242,7 +243,9 @@ check4model1$scan_negative_count <- factor(check4model$scan_negative_count)
 check4model1$unique_departments_count <- factor(check4model$unique_departments_count)
 
 model1 <- rpart(TripType ~ dayType + scanSum + scan_positive_count + scan_negative_count + unique_departments_count, data = check4model1, method = "class")
-
+r1 <- predict(model1, c(check4model1$dayType, check4model1$scanSum, check4model1$scan_positive_count, check4model1$scan_negative_count, check4model1$unique_department_count))
+confusionMatrix(check4model1$TripType, r1)
+             
 param <- list("objective" = "multi:softmax",
               "eval_metric" = "mlogloss",
               "num_class" = 38,
@@ -254,6 +257,15 @@ param <- list("objective" = "multi:softmax",
               "subsample"=0.9
 )
 
+y=check4model$TripType
+sortedTripType<-sort(unique(y))
+result<-c(1:length(y))
+for (i in 1:length(y))
+{
+  result[i]<-which(sortedTripType==y[i]) 
+}
+result<-result-1            
+             
 checkmat <- checkdataf[ ,-c(1,2)]
 for(i in 1:5000)
 {
@@ -279,3 +291,5 @@ for (i in 1:1654)
 }
 checkmatrix <- as.matrix(checkmat)
 Boostmodel <- xgboost (params = parameterlist, data = checkmatrix, label = result, nrounds = 500)
+r2 <- predict(Boostmodel, checkmatrix)
+confusionMatrix(r2, result)
