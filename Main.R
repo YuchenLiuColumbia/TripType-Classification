@@ -241,7 +241,7 @@ check4model1$scan_positive_count <- factor(check4model$scan_positive_count)
 check4model1$scan_negative_count <- factor(check4model$scan_negative_count)
 check4model1$unique_departments_count <- factor(check4model$unique_departments_count)
 
-model1 <- ctree(TripType ~ dayType + scanSum + scan_positive_count + scan_negative_count + unique_departments_count, data = check4model1)
+model1 <- rpart(TripType ~ dayType + scanSum + scan_positive_count + scan_negative_count + unique_departments_count, data = check4model1, method = "class")
 
 param <- list("objective" = "multi:softmax",
               "eval_metric" = "mlogloss",
@@ -255,7 +255,7 @@ param <- list("objective" = "multi:softmax",
 )
 
 checkmat <- checkdataf[ ,-c(1,2)]
-for(i in 1:95674)
+for(i in 1:5000)
 {
   if(checkmat$dayType[i] == "Monday")
     checkmat$dayType[i] <- '1'
